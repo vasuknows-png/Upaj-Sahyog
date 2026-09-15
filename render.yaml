@@ -1,25 +1,19 @@
 services:
   - type: web
     name: upaj-sahyog
-    runtime: node
+    runtime: docker
     plan: starter
-    buildCommand: echo "no build step - zero dependencies"
-    startCommand: node --no-warnings server.mjs
     healthCheckPath: /api/health
     disk:
       name: upaj-data
-      mountPath: /opt/render/project/src/data
+      mountPath: /app/data
       sizeGB: 1
     envVars:
-      - key: NODE_VERSION
-        value: 22.5.0
       - key: DB_PATH
-        value: /opt/render/project/src/data/upaj-sahyog.db
+        value: /app/data/upaj-sahyog.db
       - key: AADHAAR_PROVIDER
         value: simulator
       - key: PAYMENT_PROVIDER
         value: simulator
       - key: AADHAAR_HASH_SALT
         generateValue: true
-      - key: NODE_ENV
-        value: production
