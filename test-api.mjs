@@ -1,0 +1,21 @@
+const BASE=process.env.BASE||'http://localhost:3000';
+let pass=0,fail=0,token='';
+const check=(name,ok,detail='')=>{console.log(`${ok?'PASS':'FAIL'} ${name}${ok?'':` :: ${detail}`}`);ok?pass++:fail++};
+async function api(path,opts={}){const headers={'content-type':'application/json',...(opts.headers||{})};if(token)headers.authorization='Bearer '+token;const r=await fetch(BASE+path,{...opts,headers});const text=await r.text();let d;try{d=JSON.parse(text)}catch{d=text}return{r,d}}
+let x=await api('/api/health');check('health',x.r.ok&&x.d.service==='Upaj Sahyog API',JSON.stringify(x.d));
+x=await api('/');check('supplied frontend served',x.r.ok&&String(x.d).includes('Upaj Sahyog'),String(x.d).slice(0,80));
+x=await api('/style.css');check('supplied CSS served',x.r.ok&&String(x.d).length>25000);
+x=await api('/script.js');check('supplied JS served',x.r.ok&&String(x.d).length>60000);
+x=await api('/backend-adapter.js');check('backend adapter served',x.r.ok&&String(x.d).includes('loadApiListings'));
+x=await api('/api/listings');check('live listings',x.r.ok&&x.d.length>=4,JSON.stringify(x.d));
+x=await api('/api/auth/aadhaar/otp',{method:'POST',body:JSON.stringify({aadhaar:'234567890123',consent:false})});check('consent enforced',x.r.status===400);
+x=await api('/api/auth/aadhaar/otp',{method:'POST',body:JSON.stringify({aadhaar:'234567890123',consent:true,name:'Test Buyer',role:'buyer'})});check('OTP issued',x.r.ok&&x.d.transactionId&&x.d.demoOtp,JSON.stringify(x.d));const tx=x.d.transactionId,otp=x.d.demoOtp;
+x=await api('/api/auth/aadhaar/verify',{method:'POST',body:JSON.stringify({transactionId:tx,otp,name:'Test Buyer',role:'buyer'})});check('OTP verified',x.r.ok&&x.d.token,JSON.stringify(x.d));token=x.d.token;
+x=await api('/api/me');check('session',x.r.ok&&x.d.user.name==='Test Buyer',JSON.stringify(x.d));
+x=await api('/api/orders',{method:'POST',body:JSON.stringify({items:[{listingId:1,quantity:1}],address:{city:'Pune'},paymentMethod:'upi'})});check('order created',x.r.status===201&&x.d.id,JSON.stringify(x.d));const orderId=x.d.id;
+x=await api('/api/payments/order',{method:'POST',body:JSON.stringify({orderId})});check('payment created',x.r.status===201&&x.d.paymentId,JSON.stringify(x.d));const paymentId=x.d.paymentId;
+x=await api('/api/payments/verify',{method:'POST',body:JSON.stringify({orderId,paymentId})});check('payment captured to escrow',x.r.ok&&x.d.status==='paid_in_escrow',JSON.stringify(x.d));
+x=await api(`/api/orders/${orderId}/track`);check('order tracking',x.r.ok&&x.d.events.length>=2,JSON.stringify(x.d));
+x=await api('/api/forecasts');check('forecasts',x.r.ok&&x.d.length>=1);
+x=await api('/api/routes/optimize',{method:'POST',body:JSON.stringify({stops:[{name:'Farm'},{name:'Buyer'}]})});check('route optimization',x.r.ok&&x.d.optimized.length===2);
+console.log(`\n${pass} passed, ${fail} failed`);if(fail)process.exit(1);

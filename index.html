@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Upaj Sahyog — उपज सहयोग</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+<div class="phone">
+ 
+  <!-- LOGIN OVERLAY -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-mark">🌾</div>
+    <h1 id="loginTitle">Upaj Sahyog में आपका स्वागत है</h1>
+    <p class="sub" id="loginSub">जारी रखने के लिए अपनी जानकारी भरें / Fill your details to continue</p>
+ 
+    <div class="login-card">
+      <div>
+        <label class="field-label" id="loginRoleLabel">आप कौन हैं? / You are a</label>
+        <div class="login-role-row">
+          <button class="login-role-btn selected" id="loginRoleBuyer" onclick="setLoginRole('buyer')">
+            <span class="lri">🧺</span><span id="loginRoleBuyerLbl">खरीदार / Buyer</span>
+          </button>
+          <button class="login-role-btn" id="loginRoleFarmer" onclick="setLoginRole('farmer')">
+            <span class="lri">🌱</span><span id="loginRoleFarmerLbl">किसान / Farmer</span>
+          </button>
+        </div>
+      </div>
+ 
+      <div id="loginStep1">
+        <div style="margin-bottom:12px;">
+          <label class="field-label" id="nameLabel">पूरा नाम / Full name</label>
+          <input type="text" class="field-input" id="loginName" placeholder="जैसे: रौशन कुमार / Raushan Kumar">
+        </div>
+        <div>
+          <label class="field-label" id="mobileLabel">आधार कार्ड नंबर / Aadhaar number</label>
+          <input type="tel" class="field-input" id="loginMobile" maxlength="12" placeholder="12 अंकों का आधार नंबर">
+        </div>
+        <div style="height:14px"></div>
+        <button class="login-primary" id="sendOtpBtn" onclick="sendOtp()">OTP भेजें / Send OTP</button>
+        <div class="login-hint" style="margin-top:10px;" id="demoHint1">आधार OTP के लिए सहमति आवश्यक है</div>
+      </div>
+ 
+      <div id="loginStep2" class="hidden">
+        <label class="field-label" id="otpLabel">OTP दर्ज करें / Enter OTP</label>
+        <div class="login-hint" id="otpSentHint" style="margin-bottom:10px; text-align:left;">आधार से लिंक मोबाइल नंबर पर OTP भेजा गया / OTP sent to Aadhaar-linked mobile number</div>
+        <input type="text" class="field-input" id="loginOtp" maxlength="6" placeholder="6-अंक OTP" style="letter-spacing:4px; font-weight:700; text-align:center;">
+        <div style="height:14px"></div>
+        <button class="login-primary" onclick="verifyOtp()" id="verifyBtn">सत्यापित करें और आगे बढ़ें / Verify & Continue</button>
+        <div class="login-hint" style="margin-top:10px;" id="demoHint2">डेमो मोड OTP सर्वर द्वारा दिखाया जाएगा</div>
+      </div>
+    </div>
+ 
+    <div class="login-skip">
+      <button onclick="skipLogin()" id="skipBtn">अभी के लिए छोड़ें (गेस्ट मोड) / Skip for now (guest)</button>
+    </div>
+  </div>
+ 
+ 
+ 
+  <!-- APP BAR -->
+  <div class="appbar">
+    <div class="appbar-row">
+      <div class="brand">
+        <div class="brand-mark">🌾</div>
+        <div class="brand-name">Upaj Sahyog<small id="tagline">सीधे खेत से आपके घर तक</small></div>
+      </div>
+      <div class="header-actions">
+        <button class="lang-pill" id="langBtn" onclick="toggleLang()">हिं / EN</button>
+        <button class="icon-btn" onclick="goScreen('cart')">🛒<span class="cart-dot hidden" id="cartDot">0</span></button>
+      </div>
+    </div>
+ 
+    <div class="role-switch">
+      <button id="roleBuyerBtn" class="active" onclick="setRole('buyer')">🧺 <span id="rb-label">खरीदार / Buyer</span></button>
+      <button id="roleFarmerBtn" onclick="setRole('farmer')">🌱 <span id="rf-label">किसान / Farmer</span></button>
+    </div>
+ 
+    <div class="searchbar" id="searchWrap">
+      <span>🔍</span>
+      <input id="searchInput" type="text" placeholder="अनाज, सब्ज़ी खोजें... (search grains, veggies)" oninput="renderProducts()">
+    </div>
+    <div class="loc-row" id="locRow">📍 <span id="locText">Nalanda, Bihar— बदलें</span></div>
+  </div>
+ 
+  <!-- SCREENS -->
+  <div class="screen" id="screen-home">
+    <button class="govt-banner" onclick="goScreen('govtrates')">
+      <div class="gb-icon">🏛️</div>
+      <div class="gb-txt">
+        <b id="govtBannerTitle">सरकारी मंडी भाव देखें</b>
+        <span id="govtBannerSub">आधिकारिक दाम — असली व सटीक कीमत जानें</span>
+      </div>
+      <div class="gb-arrow">›</div>
+    </button>
+    <div class="chips" id="chipRow"></div>
+    <div class="section-title"><h2 id="listHeading">ताज़ा उपज / Fresh from Farms</h2><span id="listCount"></span></div>
+    <div class="grid" id="productGrid"></div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-farmer">
+    <div class="my-listing">
+      <h3>अपनी फसल बेचें — Sell your crop directly</h3>
+      <p>बिचौलियों को हटाएं, सीधे खरीदारों से जुड़ें और सही दाम पाएं। No middlemen, better price, straight to buyers.</p>
+      <button class="ghost-btn" onclick="openAddCrop()">+ नई फसल जोड़ें / Add Produce</button>
+    </div>
+    <div class="section-title"><h2>आपकी लिस्टिंग / Your Listings</h2><span id="farmerCount"></span></div>
+    <div id="farmerListings"></div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-cart">
+    <div id="cartEmpty" class="empty hidden">
+      <div class="em">🧺</div>
+      <h3>कार्ट खाली है / Cart is empty</h3>
+      <p>अनाज या सब्ज़ी चुनें और कार्ट में जोड़ें।<br>Pick fresh produce and add it to your cart.</p>
+      <button class="primary-btn" onclick="goScreen('home')">खरीदारी शुरू करें / Start Shopping</button>
+    </div>
+    <div id="cartHasItems">
+      <div class="section-title"><h2>आपकी कार्ट / Your Cart</h2><span id="cartItemCount"></span></div>
+      <div id="cartItemsWrap"></div>
+      <div class="summary-card" id="summaryCard"></div>
+      <div style="height:8px"></div>
+    </div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-address">
+    <div class="mini-header">
+      <button class="back-btn" onclick="goScreen('cart')">←</button>
+      <h2 id="addressTitle">डिलीवरी व इनवॉइस विवरण / Delivery &amp; Invoice Details</h2>
+    </div>
+    <div class="addcrop-form">
+ 
+      <div class="form-card">
+        <div>
+          <label class="field-label" id="adNameLabel">पूरा नाम / Full Name</label>
+          <input type="text" class="field-input" id="adName" placeholder="जैसे: राजेश यादव">
+        </div>
+        <div>
+          <label class="field-label" id="adPhoneLabel">मोबाइल नंबर / Mobile Number</label>
+          <input type="tel" class="field-input" id="adPhone" maxlength="10" placeholder="10-अंकों का नंबर">
+        </div>
+      </div>
+ 
+      <div class="form-card">
+        <div>
+          <label class="field-label" id="adLine1Label">पता (लाइन 1) / Address Line 1</label>
+          <input type="text" class="field-input" id="adLine1" placeholder="मकान नं., गली, मोहल्ला">
+        </div>
+        <div>
+          <label class="field-label" id="adLine2Label">पता (लाइन 2, वैकल्पिक) / Address Line 2 (optional)</label>
+          <input type="text" class="field-input" id="adLine2" placeholder="लैंडमार्क, इलाका">
+        </div>
+        <div class="two-col">
+          <div>
+            <label class="field-label" id="adCityLabel">शहर / गांव / City / Village</label>
+            <input type="text" class="field-input" id="adCity">
+          </div>
+          <div>
+            <label class="field-label" id="adStateLabel">राज्य / State</label>
+            <input type="text" class="field-input" id="adState">
+          </div>
+        </div>
+        <div>
+          <label class="field-label" id="adPinLabel">पिन कोड / PIN Code</label>
+          <input type="text" class="field-input" id="adPin" maxlength="6" placeholder="6-अंकों का पिन कोड">
+        </div>
+      </div>
+ 
+      <div class="demand-toggle">
+        <div class="dt-txt">
+          <b id="adGstTitle">GST इनवॉइस चाहिए / Need GST Invoice</b>
+          <span id="adGstSub">व्यवसाय के लिए टैक्स इनवॉइस / Tax invoice for business use</span>
+        </div>
+        <button class="switch" id="gstSwitch" onclick="toggleGstInvoice()"><span class="knob"></span></button>
+      </div>
+ 
+      <div class="form-card hidden" id="gstFields">
+        <div>
+          <label class="field-label" id="adGstNumLabel">GSTIN</label>
+          <input type="text" class="field-input" id="adGstNum" placeholder="15-अंकों का GSTIN" maxlength="15">
+        </div>
+        <div>
+          <label class="field-label" id="adBillNameLabel">बिलिंग / फर्म का नाम / Billing / Firm Name</label>
+          <input type="text" class="field-input" id="adBillName" placeholder="जैसे: यादव ट्रेडर्स">
+        </div>
+        <div>
+          <label class="field-label" id="adBillAddrLabel">बिलिंग पता / Billing Address</label>
+          <textarea class="field-textarea" id="adBillAddr" placeholder="व्यवसाय का पता (यदि डिलीवरी पते से अलग है)"></textarea>
+        </div>
+      </div>
+ 
+      <div style="height:6px"></div>
+    </div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-payment">
+    <div class="mini-header">
+      <button class="back-btn" onclick="goScreen('address')">←</button>
+      <h2 id="paymentTitle">भुगतान का तरीका / Payment Method</h2>
+    </div>
+    <div class="pay-option selected" data-pay="upi" onclick="selectPay('upi')">
+      <div class="pi">📱</div>
+      <div class="pt"><b>UPI</b><span>GPay, PhonePe, Paytm</span></div>
+      <div class="radio"><div class="dot"></div></div>
+    </div>
+    <div class="upi-input" id="upiInputWrap">
+      <label>UPI ID दर्ज करें / Enter UPI ID</label>
+      <input type="text" id="upiId" placeholder="yourname@upi">
+    </div>
+    <div class="pay-option" data-pay="card" onclick="selectPay('card')">
+      <div class="pi">💳</div>
+      <div class="pt"><b>Debit / Credit Card</b><span>Visa, Mastercard, RuPay</span></div>
+      <div class="radio"><div class="dot"></div></div>
+    </div>
+    <div class="pay-option" data-pay="cod" onclick="selectPay('cod')">
+      <div class="pi">💵</div>
+      <div class="pt"><b>Cash on Delivery</b><span>डिलीवरी पर नकद भुगतान</span></div>
+      <div class="radio"><div class="dot"></div></div>
+    </div>
+    <div class="summary-card" id="paySummaryCard"></div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-success">
+    <div class="success-wrap">
+      <div class="success-tick">✓</div>
+      <h2>ऑर्डर हो गया! / Order Placed!</h2>
+      <p>आपका भुगतान सफल रहा। किसान को सूचित कर दिया गया है।<br>Payment successful. The farmer has been notified.</p>
+      <div class="order-id" id="orderIdText">Order #KS0000</div>
+    </div>
+    <div class="summary-card" id="invoiceSummaryCard" style="margin:0 16px 10px;"></div>
+    <div style="padding:0 16px 4px;">
+      <button class="primary-btn" style="width:100%; background:#fff; color:var(--green-700); border:1.5px solid var(--green-700);" onclick="downloadInvoice()" id="downloadInvoiceBtn">⬇ इनवॉइस डाउनलोड करें / Download Invoice</button>
+    </div>
+    <div class="track-card">
+      <div class="track-step"><div class="tdot"></div><div class="ttxt"><b>ऑर्डर कन्फर्म / Order confirmed</b><span>अभी / just now</span></div></div>
+      <div class="track-step pending"><div class="tdot"></div><div class="ttxt"><b>किसान पैकिंग कर रहा है / Farmer packing</b><span>अनुमानित 2 घंटे / est. 2 hrs</span></div></div>
+      <div class="track-step pending"><div class="tdot"></div><div class="ttxt"><b>लॉजिस्टिक्स पिकअप / Logistics pickup</b><span>कल सुबह / tomorrow AM</span></div></div>
+      <div class="track-step pending"><div class="tdot"></div><div class="ttxt"><b>डिलीवर हुआ / Delivered</b><span>अनुमानित 2 दिन / est. 2 days</span></div></div>
+    </div>
+    <div style="padding:20px 16px 4px;">
+      <button class="primary-btn" style="width:100%" onclick="backToHomeFresh()">होम पर जाएं / Back to Home</button>
+    </div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-profile">
+    <div class="profile-head">
+      <div class="avatar-wrap">
+        <div class="avatar" id="profileAvatar">RY</div>
+        <button class="avatar-edit-btn" onclick="document.getElementById('avatarFileInput').click()" id="avatarEditBtn" title="फोटो बदलें / Change photo">📷</button>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
+      </div>
+      <div>
+        <div class="pname" id="profileName">राजेश यादव</div>
+        <div class="pmeta" id="profileMobile">आधार / Aadhaar: XXXX XXXX 1234</div>
+        <div class="profile-badge" id="profileRoleBadge">🌱 किसान / Farmer</div>
+      </div>
+    </div>
+    <div class="profile-menu">
+      <div class="profile-row" onclick="showToast(t('डेमो: पता बदलने का फॉर्म','Demo: edit address form'))"><span class="pri">📍</span><span id="profRow1">पता बदलें / Change Address</span><span class="prc">›</span></div>
+      <div class="profile-row" onclick="goScreen('orders')"><span class="pri">📦</span><span id="profRow2">मेरे ऑर्डर / My Orders</span><span class="prc">›</span></div>
+      <div class="profile-row" onclick="goScreen('govtrates')"><span class="pri">🏛️</span><span id="profRowGovt">सरकारी मंडी भाव / Govt Mandi Rates</span><span class="prc">›</span></div>
+      <div class="profile-row" id="profRow3Wrap" onclick="goScreen('farmer')"><span class="pri">🌾</span><span id="profRow3">मेरी फसल लिस्टिंग / My Listings</span><span class="prc">›</span></div>
+      <div class="profile-row" onclick="toggleLang()"><span class="pri">🌐</span><span id="profRow4">भाषा बदलें / Change Language</span><span class="prc">हिं / EN</span></div>
+      <div class="profile-row" onclick="showToast(t('डेमो: सहायता केंद्र','Demo: help center'))"><span class="pri">❓</span><span id="profRow5">सहायता / Help &amp; Support</span><span class="prc">›</span></div>
+      <div class="profile-row logout" onclick="logout()"><span class="pri">↩</span><span id="profRow6">लॉग आउट / Logout</span></div>
+    </div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-addcrop">
+    <div class="mini-header">
+      <button class="back-btn" onclick="goScreen('farmer')">←</button>
+      <h2 id="addCropTitle">नई फसल जोड़ें / Add Produce</h2>
+    </div>
+    <div class="addcrop-form">
+ 
+      <div class="form-card">
+        <div>
+          <label class="field-label" id="acEmojiLabel">फसल की तस्वीर चुनें / Choose crop icon</label>
+          <div class="emoji-row" id="emojiRow"></div>
+        </div>
+        <div>
+          <label class="field-label" id="acCatLabel">श्रेणी / Category</label>
+          <div class="cat-row" id="acCatRow"></div>
+        </div>
+      </div>
+ 
+      <div class="form-card">
+        <div>
+          <label class="field-label" id="acNameHiLabel">फसल का नाम (हिंदी में) / Crop name (Hindi)</label>
+          <input type="text" class="field-input" id="acNameHi" placeholder="जैसे: गेहूं (गेहूं 306)">
+        </div>
+        <div>
+          <label class="field-label" id="acNameEnLabel">Crop name (English)</label>
+          <input type="text" class="field-input" id="acNameEn" placeholder="e.g. Wheat (HD-2967)">
+        </div>
+      </div>
+ 
+      <div class="form-card">
+        <div class="two-col">
+          <div>
+            <label class="field-label" id="acQtyLabel">मात्रा / Quantity</label>
+            <input type="number" min="0" class="field-input" id="acQty" placeholder="जैसे: 40">
+          </div>
+          <div>
+            <label class="field-label" id="acUnitLabel">इकाई / Unit</label>
+            <select class="field-select" id="acUnit">
+              <option value="क्विंटल">क्विंटल / Quintal</option>
+              <option value="किलो">किलो / Kg</option>
+              <option value="दर्जन">दर्जन / Dozen</option>
+              <option value="टोकरी">टोकरी / Basket</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label" id="acPriceLabel">प्रति इकाई मूल्य (₹) / Price per unit (₹)</label>
+          <input type="number" min="0" class="field-input" id="acPrice" placeholder="जैसे: 2150" oninput="updatePricePreview()">
+        </div>
+        <div class="price-preview">
+          <span class="pp-label" id="ppLabel">अनुमानित कुल मूल्य / Estimated total value</span>
+          <span class="pp-val" id="ppVal">₹0</span>
+        </div>
+      </div>
+ 
+      <div class="form-card">
+        <div>
+          <label class="field-label" id="acLocLabel">स्थान / Location</label>
+          <input type="text" class="field-input" id="acLoc" placeholder="जैसे: बरेली, छपरा, बिहार">
+        </div>
+        <div>
+          <label class="field-label" id="acNoteLabel">अतिरिक्त जानकारी (वैकल्पिक) / Notes (optional)</label>
+          <textarea class="field-textarea" id="acNote" placeholder="जैसे: जैविक खेती, ताज़ी कटाई..."></textarea>
+        </div>
+      </div>
+ 
+      <div class="demand-toggle">
+        <div class="dt-txt">
+          <b id="dtTitle">ज़्यादा मांग टैग / High demand tag</b>
+          <span id="dtSub">खरीदारों को अधिक दिखेगा / Shows more to buyers</span>
+        </div>
+        <button class="switch" id="demandSwitch" onclick="toggleDemand()"><span class="knob"></span></button>
+      </div>
+ 
+      <button class="login-primary" onclick="submitAddCrop()" id="acSubmitBtn">फसल लिस्ट करें / List Produce</button>
+      <div style="height:6px"></div>
+    </div>
+  </div>
+ 
+  <div class="screen hidden" id="screen-govtrates">
+    <div class="mini-header">
+      <button class="back-btn" onclick="goScreen('home')">←</button>
+      <h2 id="govtRatesTitle">सरकारी मंडी भाव / Govt Mandi Rates</h2>
+    </div>
+    <div class="govt-badge-row">
+      <span class="govt-badge" id="govtSourceBadge">📡 स्रोत: कृषि विभाग / मंडी समिति</span>
+      <span class="sheet-updated" id="govtUpdatedText"></span>
+    </div>
+    <div class="govt-note" id="govtNoteText">
+      यह आधिकारिक सरकारी मंडी भाव है ताकि सभी को असली और सही कीमत पता चल सके। मंडी अधिकारी/एडमिन नीचे दी गई शीट में भाव अपडेट कर सकते हैं — बिल्कुल एक्सेल शीट की तरह।
+    </div>
+    <div class="govt-toolbar">
+      <button class="gt-btn solid" onclick="addGovtRow()" id="govtAddBtn">+ नई पंक्ति / Add Row</button>
+      <button class="gt-btn" onclick="saveGovtRates()" id="govtSaveBtn">💾 सेव करें / Save</button>
+    </div>
+    <div class="sheet-wrap">
+      <table class="sheet-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th id="thCrop">फसल / Commodity</th>
+            <th id="thMarket">मंडी / Market</th>
+            <th id="thMin">न्यून. भाव / Min (₹)</th>
+            <th id="thMax">अधि. भाव / Max (₹)</th>
+            <th id="thModal">मॉडल भाव / Modal (₹)</th>
+            <th id="thUnit">इकाई / Unit</th>
+            <th id="thDate">दिनांक / Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="govtRatesBody"></tbody>
+      </table>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+ 
+  <!-- CHECKOUT BAR (only on cart screen) -->
+  <div class="checkout-bar" id="checkoutBar">
+    <div class="total-block"><small id="checkoutSmall">कुल राशि / Total</small><div class="amt" id="checkoutAmt">₹0</div></div>
+    <button class="primary-btn" id="checkoutBtn" onclick="goToAddress()">आगे बढ़ें / Proceed →</button>
+  </div>
+  <div class="checkout-bar hidden" id="addressBar">
+    <div class="total-block"><small id="addressBarSmall">कुल राशि / Total</small><div class="amt" id="addressAmt">₹0</div></div>
+    <button class="primary-btn" id="addressContinueBtn" onclick="saveAddressAndContinue()">भुगतान पर जाएं / Continue to Payment →</button>
+  </div>
+  <div class="checkout-bar hidden" id="payBar">
+    <div class="total-block"><small>भुगतान राशि / Pay amount</small><div class="amt" id="payAmt">₹0</div></div>
+    <button class="primary-btn" onclick="placeOrder()">भुगतान करें / Pay Now</button>
+  </div>
+ 
+  <!-- BOTTOM NAV -->
+  <div class="bottomnav" id="bottomNav">
+    <button class="navbtn active" data-nav="home" onclick="goScreen('home')"><span class="navicon">🏠</span>होम / Home</button>
+    <button class="navbtn" data-nav="cart" onclick="goScreen('cart')"><span class="navicon">🛒<span class="navbadge hidden" id="navCartBadge">0</span></span>कार्ट / Cart</button>
+    <button class="navbtn" data-nav="orders" onclick="goScreen('orders')"><span class="navicon">📦</span>ऑर्डर / Orders</button>
+    <button class="navbtn" data-nav="profile" onclick="goScreen('profile')"><span class="navicon">👤</span><span id="navProfileLbl">प्रोफ़ाइल</span></button>
+  </div>
+ 
+  <!-- AI CHATBOT -->
+  <button class="chat-fab" id="chatFab" onclick="openChatBot()">
+    <span class="chat-fab-icon">🤖</span>
+  </button>
+ 
+  <div class="chat-panel hidden" id="chatPanel">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-bot-avatar">🤖</div>
+        <div>
+          <div class="chat-bot-name">साथी AI <span class="chat-online-dot"></span></div>
+          <div class="chat-bot-sub" id="chatBotSub">हमेशा उपलब्ध / Always available</div>
+        </div>
+      </div>
+      <div class="chat-header-tools">
+       
+        <button class="chat-close" onclick="closeChatBot()">✕</button>
+      </div>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-quick-row" id="chatQuickRow"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="अपना सवाल लिखें... / Type your question..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+      <button class="mic-btn" onclick="startVoiceInput()" id="micBtn" title="बोलकर पूछें / Ask by voice">🎤</button>
+      <button onclick="sendChatMessage()" id="chatSendBtn">➤</button>
+    </div>
+  </div>
+ 
+  <div class="toast" id="toast"></div>
+</div>
+ 
+<script src="script.js"></script>
+<script src="backend-adapter.js"></script>
+ 
+</body>
+</html>

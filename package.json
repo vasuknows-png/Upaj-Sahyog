@@ -1,0 +1,11 @@
+{
+  "name": "upaj-sahyog",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --no-warnings server.mjs",
+    "test": "node scripts/test-api.mjs"
+  },
+  "engines": { "node": ">=22.5.0" }
+}

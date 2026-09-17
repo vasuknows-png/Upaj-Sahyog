@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: upaj-sahyog
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: upaj-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: DB_PATH
+        value: /app/data/upaj-sahyog.db
+      - key: AADHAAR_PROVIDER
+        value: simulator
+      - key: PAYMENT_PROVIDER
+        value: simulator
+      - key: AADHAAR_HASH_SALT
+        generateValue: true
